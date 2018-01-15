@@ -3250,6 +3250,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    public boolean isUsingExtendedTheme() {
+        OverlayInfo themeInfo = null;
+        try {
+            themeInfo = mOverlayManager.getOverlayInfo("com.android.system.theme.extended",
+                    mCurrentUserId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return themeInfo != null && themeInfo.isEnabled();
     }
 
     @Nullable
@@ -5396,10 +5405,16 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected void updateTheme() {
         final boolean inflated = mStackScroller != null;
 
+<<<<<<< HEAD
         haltTicker();
 
         int userThemeSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SYSTEM_THEME_STYLE, 0, mCurrentUserId);
+=======
+        int userThemeSetting = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.DEVICE_THEME, 0, mCurrentUserId);
+        boolean useExtendedTheme = false;
+>>>>>>> 5d2699d... Base: Add extended theme [1/3]
         boolean useBlackTheme = false;
         boolean useDarkTheme = false;
         if (userThemeSetting == 0) {
@@ -5414,9 +5429,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             useDarkTheme = userThemeSetting == 2;
             useBlackTheme = userThemeSetting == 3;
+<<<<<<< HEAD
             // Check for black and white accent so we don't end up
             // with white on white or black on black
             unfuckBlackWhiteAccent();
+=======
+            useExtendedTheme = userThemeSetting == 4;
+>>>>>>> 5d2699d... Base: Add extended theme [1/3]
         }
         if (isUsingDarkTheme() != useDarkTheme) {
             try {
@@ -5451,6 +5470,17 @@ public class StatusBar extends SystemUI implements DemoMode,
                 // Check for black and white accent so we don't end up
                 // with white on white or black on black
                 unfuckBlackWhiteAccent();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't change theme", e);
+            }
+        }
+
+        if (isUsingExtendedTheme() != useExtendedTheme) {
+            try {
+                mOverlayManager.setEnabled("com.android.system.theme.extended",
+                        useExtendedTheme, mCurrentUserId);
+                mOverlayManager.setEnabled("com.android.settings.theme.extended",
+                        useExtendedTheme, mCurrentUserId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't change theme", e);
             }
